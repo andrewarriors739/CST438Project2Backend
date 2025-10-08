@@ -1,4 +1,4 @@
-package com.group6.backend;
+package com.group6.backend.controller;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ public class SecurityConfig {
     http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/api/health").permitAll()  // allow health without auth
+        .requestMatchers("/api/health", "/api/test-db", "/api/db-time").permitAll()  // allow health without auth
         .anyRequest().authenticated()                 // everything else protected (for later)
       )
       .httpBasic(basic -> {}); // keep simple Basic auth on protected routes for now
