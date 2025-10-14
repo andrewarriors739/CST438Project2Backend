@@ -12,7 +12,7 @@ import java.time.*;
 @Table(name == "words")
 
 //We then will define what a word will consist off and what it will include
-public class word {
+public class Vocab {
 
     //The word will need an ID
 
