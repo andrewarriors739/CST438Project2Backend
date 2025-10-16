@@ -13,7 +13,7 @@ public class SecurityConfig {
     http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/api/health").permitAll()  // allow health without auth
+        .requestMatchers("/api/health", "/api/test-db", "/api/db-time", "/api/words").permitAll()  // allow health without auth
         .anyRequest().authenticated()                 // everything else protected (for later)
       )
       .httpBasic(basic -> {}); // keep simple Basic auth on protected routes for now
