@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -18,29 +19,32 @@ public class SecurityConfig {
       .csrf(csrf -> csrf.disable())
       .cors(cors -> cors.configurationSource(req -> {
         CorsConfiguration c = new CorsConfiguration();
-        // add your frontend origins here as needed
-        c.setAllowedOrigins(List.of("*"));
+        // DEV: allow all. PROD: replace with your real app origins (e.g., https://your-expo.dev, https://*.herokuapp.com)
+        c.setAllowedOriginPatterns(List.of("*"));
         c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         c.setAllowedHeaders(List.of("*"));
+        c.setExposedHeaders(List.of("Authorization")); // optional but handy
         c.setAllowCredentials(true);
+        c.setMaxAge(3600L);
         return c;
       }))
       .authorizeHttpRequests(auth -> auth
-        // public: landing + static + health/dev endpoints
         .requestMatchers(
           "/", "/index.html", "/error", "/favicon.ico",
           "/static/**", "/assets/**", "/css/**", "/js/**",
           "/actuator/**",
           "/api/health", "/api/test-db", "/api/db-time",
-          "/api/words", "/api/words/**"
+          "/api/words", "/api/words/**",
+          // OAuth flow endpoints must be public
+          "/auth/**"
         ).permitAll()
-        // preflight
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-        // everything else is also public for now (no login prompt)
+        // Phase A: leave public; Phase B: change to .anyRequest().authenticated()
         .anyRequest().permitAll()
-      );
-      // ⚠️ No httpBasic() while we’re public; that’s what triggers the browser prompt
+      )
+      .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+    // No httpBasic(), no formLogin()
     return http.build();
   }
 }
