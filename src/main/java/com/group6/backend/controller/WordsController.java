@@ -68,4 +68,14 @@ public class WordsController {
 
         return ResponseEntity.ok(dailyWord);
     }
+
+    // DELETE a word by its ID
+    @DeleteMapping("/{wordId}")
+    public ResponseEntity<Void> deleteWordById(@PathVariable Long wordId) {
+        if (!repo.existsById(wordId)) {
+            return ResponseEntity.notFound().build();
+        }
+        repo.deleteById(wordId);
+        return ResponseEntity.ok().build();
+    }
 }
