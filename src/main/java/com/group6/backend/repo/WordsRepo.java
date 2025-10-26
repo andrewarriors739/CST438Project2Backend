@@ -9,5 +9,4 @@ import org.springframework.stereotype.Repository;
 public interface WordsRepo extends JpaRepository<Word, Long> {
     boolean existsByTermIgnoreCase(String term);
     Word findByTermIgnoreCase(String term);
-
 }
