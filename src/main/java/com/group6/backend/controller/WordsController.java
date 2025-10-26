@@ -31,10 +31,14 @@ public class WordsController {
         if (newWord.getTerm() == null || newWord.getTerm().isBlank()) {
             return ResponseEntity.badRequest().body(" 'term' cannot be empty");
         }
+        if (newWord.getDefinition() == null || newWord.getDefinition().isBlank()) {
+            return ResponseEntity.badRequest().body("'definition' cannot be empty");
+        }
+    
 
         // Prevent duplicates
         if (repo.existsByTermIgnoreCase(newWord.getTerm())) {
-            return ResponseEntity.status(409).body("⚠️ Word already exists!");
+            return ResponseEntity.status(409).body("Word already exists!");
         }
 
         // Save to DB
