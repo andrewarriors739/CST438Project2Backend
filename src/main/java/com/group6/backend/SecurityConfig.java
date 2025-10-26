@@ -13,6 +13,7 @@ public class SecurityConfig {
     http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
+      .requestMatchers("/h2-console/**").permitAll()
         .requestMatchers("/api/health", "/api/test-db", "/api/db-time", "/api/words").permitAll()  // allow health without auth
         .anyRequest().authenticated()                 // everything else protected (for later)
       )
