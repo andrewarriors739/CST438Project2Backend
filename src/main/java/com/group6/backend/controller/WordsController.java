@@ -74,7 +74,19 @@ public class WordsController {
 
         return ResponseEntity.ok(dailyWord);
     }
+   @GetMapping("/random")
+    public ResponseEntity<?> getRandomWord() {
+        List<Word> words = repo.findAll();
+        if (words.isEmpty()) {
+            return ResponseEntity.status(404).body("No words available");
+        }
 
+        // Get a random word from the list 
+        int i = (int) (Math.random() * words.size());
+        Word randomWord = words.get(i);
+
+        return ResponseEntity.ok(randomWord);
+    }  
     // DELETE a word by its ID
     @DeleteMapping("/{wordId}")
     public ResponseEntity<Void> deleteWordById(@PathVariable Long wordId) {
