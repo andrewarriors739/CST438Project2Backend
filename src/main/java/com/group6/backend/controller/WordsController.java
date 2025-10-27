@@ -5,8 +5,8 @@ import com.group6.backend.repo.WordsRepo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 // Routes
 @RestController
@@ -56,7 +56,7 @@ public class WordsController {
         return ResponseEntity.ok(word);
     }
 
-    // GET daily word (random word for simplicity)
+    // GET daily word based on the day of the year
     @GetMapping("/daily")
     public ResponseEntity<?> getDailyWord() {
         List<Word> words = repo.findAll();
@@ -64,7 +64,13 @@ public class WordsController {
             return ResponseEntity.status(404).body("No words available");
         }
 
-        Word dailyWord = words.get(ThreadLocalRandom.current().nextInt(words.size()));
+        // Get the day of the year: 1-365 or 1-366 if leap year
+        int dayOfYear = LocalDate.now().getDayOfYear();
+        
+        // Use % to go through available words based on the day of the year
+        int wordIndex = dayOfYear % words.size();
+        
+        Word dailyWord = words.get(wordIndex);
 
         return ResponseEntity.ok(dailyWord);
     }
