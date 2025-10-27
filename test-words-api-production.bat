@@ -33,7 +33,7 @@ echo.
 echo.
 
 echo [6] Extracting word ID and DELETE the word we just added
-powershell -Command "$json = Get-Content temp_word.json | ConvertFrom-Json; $wordId = $json.id; curl -X DELETE https://group6-backend-717076585089.herokuapp.com/api/words/$wordId"
+powershell -Command "$json = Get-Content temp_word.json -Raw | ConvertFrom-Json; $wordId = $json.id; Invoke-RestMethod -Uri \"https://group6-backend-717076585089.herokuapp.com/api/words/$wordId\" -Method Delete"
 echo.
 echo.
 
