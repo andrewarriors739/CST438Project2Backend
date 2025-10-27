@@ -28,7 +28,7 @@ public class WordsControllerIT {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private WordRepository wordsRepo;
+    private WordsRepo wordsRepo;
 
     private String baseUrl;
 
@@ -54,8 +54,9 @@ public class WordsControllerIT {
         assertThat(response.getBody().length).isEqualTo(3);
         
         Word[] words = response.getBody();
-        assertThat(words).extracting(Word::getWord)
-            .containsExactlyInAnyOrder("apple", "banana", "cherry");
+        assertThat(words)                    // words is Word[]
+  .extracting("term")               // or "term" if your field is named term
+  .containsExactlyInAnyOrder("apple","banana","cherry");
     }
 
     @Test
