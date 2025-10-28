@@ -7,8 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,33 +19,38 @@ import com.group6.backend.repo.WordsRepo;
 public class ListItemsController {
   private final ListItemRepo items;
   private final WordsRepo words;
+  private final VocabListRepo lists;   // add
 
-  public ListItemsController(ListItemRepo items, WordsRepo words){
-    this.items=items; this.words=words;
+  public ListItemsController(ListItemRepo items, WordsRepo words, VocabListRepo lists){
+    this.items=items; this.words=words; this.lists=lists;
   }
 
-  // Return actual Word objects for easy UI
+  private boolean listOwnedByUser(Long userId, Long listId){
+    return lists.findById(listId).map(l -> l.getUserId().equals(userId)).orElse(false);
+  }
+
   @GetMapping
-  public List<Word> list(@PathVariable Long listId){
+  public ResponseEntity<?> list(@PathVariable Long userId, @PathVariable Long listId){
+    if (!listOwnedByUser(userId, listId)) return ResponseEntity.status(404).body("list not found");
     var rows = items.findByListIdOrderByIdAsc(listId);
-    var ids = rows.stream().map(ListItem::getWordId).toList();
-    return ids.isEmpty()? List.of() : words.findAllById(ids);
+    var ids  = rows.stream().map(ListItem::getWordId).toList();
+    var wordsList = ids.isEmpty()? List.<Word>of() : words.findAllById(ids);
+    return ResponseEntity.ok(wordsList);
   }
 
-  @PostMapping
-  public ResponseEntity<?> add(@PathVariable Long listId, @RequestBody AddReq body){
-    if (body.wordId()==null) return ResponseEntity.badRequest().body("wordId required");
-    if (!words.existsById(body.wordId())) return ResponseEntity.status(404).body("word not found");
-    if (items.existsByListIdAndWordId(listId, body.wordId())) return ResponseEntity.noContent().build();
-    var li=new ListItem(); li.setListId(listId); li.setWordId(body.wordId()); items.save(li);
+  @PutMapping("/{wordId}")
+  public ResponseEntity<?> add(@PathVariable Long userId, @PathVariable Long listId, @PathVariable Long wordId) {
+    if (!listOwnedByUser(userId, listId)) return ResponseEntity.status(404).body("list not found");
+    if (!words.existsById(wordId)) return ResponseEntity.status(404).body("word not found");
+    if (items.existsByListIdAndWordId(listId, wordId)) return ResponseEntity.noContent().build();
+    var li = new ListItem(); li.setListId(listId); li.setWordId(wordId); items.save(li);
     return ResponseEntity.status(201).build();
   }
 
   @DeleteMapping("/{wordId}")
-  public ResponseEntity<?> remove(@PathVariable Long listId, @PathVariable Long wordId){
+  public ResponseEntity<?> remove(@PathVariable Long userId, @PathVariable Long listId, @PathVariable Long wordId){
+    if (!listOwnedByUser(userId, listId)) return ResponseEntity.status(404).body("list not found");
     items.deleteByListIdAndWordId(listId, wordId);
     return ResponseEntity.noContent().build();
   }
-
-  public static record AddReq(Long wordId) {}
 }

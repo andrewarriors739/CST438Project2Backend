@@ -23,6 +23,15 @@ public class VocabListController {
     return repo.findByUserIdOrderByIdAsc(userId);
   }
 
+  // NEW: get one list
+  @GetMapping("/{listId}")
+  public ResponseEntity<?> one(@PathVariable Long userId, @PathVariable Long listId) {
+    return repo.findById(listId)
+      .filter(l -> l.getUserId().equals(userId))
+      .<ResponseEntity<?>>map(ResponseEntity::ok)
+      .orElseGet(() -> ResponseEntity.status(404).body("list not found"));
+  }
+
   @PostMapping
   public ResponseEntity<?> create(@PathVariable Long userId, @RequestBody CreateList req){
     if (req.name()==null || req.name().isBlank()) return ResponseEntity.badRequest().body("name required");
